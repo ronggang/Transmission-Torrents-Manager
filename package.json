@@ -9,7 +9,9 @@
     "body-parser": "^1.19.0",
     "chalk": "^3.0.0",
     "commander": "^4.0.1",
+    "extend": "^3.0.2",
     "figlet": "^1.2.4",
+    "file-saver": "^2.0.2",
     "inquirer": "^7.0.0",
     "jszip": "^3.2.2",
     "parse-torrent": "^7.0.1",
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@types/bencode": "^2.0.0",
     "@types/figlet": "^1.2.0",
+    "@types/file-saver": "^2.0.1",
     "@types/inquirer": "^6.5.0",
     "@types/jquery": "^3.3.31",
     "@types/jszip": "^3.1.6",
@@ -46,10 +49,14 @@
   },
   "scripts": {
     "web": "vue-cli-service build --mode=development",
-    "serve": "vue-cli-service build --mode=development && tsc -p src/server && node ./dist/index.js",
-    "server": "tsc -p src/server && node ./dist/index.js",
-    "dev": "tsc -p src/server && node ./dist/ttmanager.js",
-    "pkg": "tsc -p src/server && pkg . --out-path bin --targets=latest-linux-armv7"
+    "serve": "vue-cli-service build --mode=development && tsc -p ./src/server && node ./dist/index.js",
+    "server": "tsc -p ./src/server && node ./dist/index.js",
+    "dev": "tsc -p ./src/server && node ./dist/ttmanager.js",
+    "pkg": "tsc -p ./src/server && pkg . --out-path bin --targets=latest-linux-armv7",
+    "build": "vue-cli-service build . && tsc -p ./src/server",
+    "clean": "rm -rf ./node_modules",
+    "docker:build": "docker image build -t ttmanager .",
+    "docker:build-debug": "docker image build -f debug.dockerfile -t ttmanager ."
   },
   "pkg": {
     "scripts": "dist/**/*.js",

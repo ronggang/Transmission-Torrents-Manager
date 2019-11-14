@@ -75,7 +75,7 @@ export class Manager {
     saveAs: string = ""
   ): Promise<any> {
     return new Promise<any>((resolve?: any, reject?: any) => {
-      console.log("开始分析种子文件");
+      console.log("开始分析种子文件, 源目录：%s, 目标目录：%s", from, to);
       const list = this.list(from, true);
       const zip = new JSZip();
 
@@ -90,11 +90,15 @@ export class Manager {
         );
 
         let resume: any = null;
-        if (from != to) {
+        if (to && from != to) {
           item.resume.destination = to;
           resume = this.parser.encode(item.resume);
+          // resume = resume.replace(
+          //   `${from.length}:${from}`,
+          //   `${to.length}:${to}`
+          // );
         } else {
-          resume = FS.readFileSync(item.torrentFile);
+          resume = FS.readFileSync(item.resumeFile);
         }
 
         zip.file(`resume/${item.basename}.resume`, resume);
@@ -119,9 +123,31 @@ export class Manager {
             resolve(saveAs);
           });
       } else {
-        zip.generateAsync({ type: "blob" }).then((blob: any) => {
-          resolve(blob);
-        });
+        saveAs = "./tmp.zip";
+        zip
+          .generateNodeStream({
+            type: "nodebuffer",
+            streamFiles: true,
+            compression: "DEFLATE",
+            compressionOptions: {
+              level: 9
+            }
+          })
+          .pipe(FS.createWriteStream(saveAs))
+          .on("finish", () => {
+            console.log("--------------------");
+            console.log(
+              `${list.length} 个种子文件导出完成，已保存为 ${saveAs}`
+            );
+            FS.readFile(saveAs, (err, data) => {
+              FS.unlinkSync(saveAs);
+              resolve(data);
+            });
+          });
+
+        // zip.generateAsync({ type: "blob" }).then((blob: any) => {
+        //   resolve(blob);
+        // });
       }
     });
   }

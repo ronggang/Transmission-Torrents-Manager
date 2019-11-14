@@ -10,7 +10,7 @@
 		// 生成的目标格式
 		"target": "ES5",
 		// 目标目录
-		"outDir": "dist",
+		"outDir": "dist/web",
 		// 
 		"types": [
 			"webpack-env",
@@ -21,15 +21,18 @@
 		"pretty": true,
 		// 编译需要包含的库
 		"lib": [
+			"esnext",
 			"dom",
+			"dom.iterable",
+			"scripthost"
 		],
 		// 列出编译后生成文件的名字
 		"listEmittedFiles": true,
 		"experimentalDecorators": true
 	},
 	"include": [
-		"src/**/*.ts",
-		"src/**/*.vue",
+		"src/web/**/*.ts",
+		"src/web/**/*.vue",
 	],
 	"exclude": [
 		"node_modules",

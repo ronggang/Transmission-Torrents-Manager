@@ -35,11 +35,12 @@ export class ManagerController {
     res: restify.Response,
     next: restify.Next
   ) {
-    this.service.export(req.params.from, req.params.to).then(result => {
+    // console.log("req.params", req);
+    this.service.export(req.body.from, req.body.to).then(result => {
       res.send(200, result, {
         "Content-Type": "application/octet-stream",
         "Content-Disposition":
-          "attachment; filename=" + (req.params.saveAs || "export.zip")
+          "attachment; filename=" + (req.body.saveAs || "export.zip")
       });
     });
     next();

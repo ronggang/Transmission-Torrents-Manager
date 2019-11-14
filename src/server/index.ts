@@ -18,7 +18,7 @@ function main() {
         port: 8088,
         name: "Transmission Torrents Manager",
         version: "0.0.1",
-        transmissionPath: ""
+        transmissionPath: PATH.join(__dirname, "../transmission/")
       }
     };
     FS.writeFileSync(conf, JSON.stringify(defaultConf));

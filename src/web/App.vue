@@ -24,8 +24,16 @@
           </v-list-item-content>
 
           <v-list-item-action>
-            <v-btn icon>
-              <v-icon color="grey lighten-1">mdi-information</v-icon>
+            <v-btn icon title="导出" @click="exportTorrent(item)">
+              <v-icon>save</v-icon>
+            </v-btn>
+
+            <v-btn
+              icon
+              title="导出并重新设置保存目录"
+              @click="exportTorrent(item, true)"
+            >
+              <v-icon>save_alt</v-icon>
             </v-btn>
           </v-list-item-action>
         </v-list-item>
@@ -35,6 +43,8 @@
 </template>
 
 <script lang="ts">
+import { FileDownloader, ERequestMethod } from "./downloader";
+
 export default {
   name: "App",
 
@@ -52,6 +62,50 @@ export default {
         console.log(result);
         this.paths = result.data;
       });
+    },
+
+    exportTorrent(item: any, resetPath: boolean = false) {
+      console.log(item);
+      let to = "";
+      if (resetPath) {
+        to = window.prompt("请输入目标路径");
+        if (to === null) {
+          return;
+        }
+      }
+
+      let file = new FileDownloader({
+        url: "./api/export",
+        method: ERequestMethod.POST
+      });
+
+      file.postData = {
+        from: item.path,
+        to
+      };
+
+      file.start();
+      // $.ajax({
+      //   url: "./api/export",
+      //   method: "POST",
+      //   dataType: "binary",
+      //   data: {
+      //     from: item.path
+      //   },
+      //   beforeSend: function(jqXHR, settings) {
+      //     if (settings.dataType === "binary") {
+      //       settings.xhr().responseType = "blob";
+      //       settings.processData = false;
+      //     }
+      //   },
+      //   success: data => {
+      //     console.log(data); //ArrayBuffer
+      //     FileSaver.saveAs(new Blob([data]), "export.zip");
+      //   },
+      //   error: error => {
+      //     console.log(error);
+      //   }
+      // });
     }
   }
 };
