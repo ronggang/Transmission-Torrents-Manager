@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@/*": [
+				"/*"
+			]
+		},
+		"target": "ES5",
+		"outDir": "../../dist",
+		"types": [],
+		"pretty": true,
+		"lib": [
+			"dom"
+		],
+		"listEmittedFiles": true
+	},
+	"include": [
+		"**/*.ts",
+	],
+	"exclude": [
+		"node_modules",
+		"**/*.spec.ts",
+		"*.js"
+	]
+}

@@ -1,0 +1,32 @@
+.DS_Store
+node_modules
+/dist
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+debug/dist
+
+# Chrome 插件文件
+*.crx
+*.pem
+*.zip
+
+# 发布的二进制文件
+/releases
+/bin
+/config
