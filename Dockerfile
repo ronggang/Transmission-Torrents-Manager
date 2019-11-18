@@ -7,6 +7,7 @@ COPY ./package.json ./tsconfig.json ./yarn.lock ./vue.config.js $APP_PATH/
 # 设置工作路径
 WORKDIR $APP_PATH
 # 安装环境
+RUN yarn global add node-gyp
 RUN yarn install
 # 复制源码
 COPY ./src $APP_PATH/src
