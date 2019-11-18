@@ -6,16 +6,15 @@ ARG APP_PATH="/app"
 COPY ./package.json ./tsconfig.json ./yarn.lock ./vue.config.js $APP_PATH/
 # 设置工作路径
 WORKDIR $APP_PATH
-# 安装环境
-RUN apk add python
-RUN yarn global add node-gyp
-RUN yarn install
+# 移除 Docker 中不需要的库并安装环境
+RUN yarn remove fibers commander inquirer chalk && yarn install
 # 复制源码
 COPY ./src $APP_PATH/src
 # 复制公用文件
 COPY ./public $APP_PATH/public
-# 编译源码并清理编译环境
-RUN yarn build && yarn clean && yarn install --production
+# 1. 删除 Docker 中没用的内容
+# 2. 编译源码并清理编译环境
+RUN rm $APP_PATH/src/server/ttmanager.ts && yarn build && yarn clean && yarn install --production
 
 # 第二层，运行环境
 FROM node:alpine
