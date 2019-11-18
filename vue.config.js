@@ -1,9 +1,3 @@
-const path = require("path");
-// 用于替换 @ 符号的路径
-function resolve(dir) {
-  return path.join(__dirname, "..", dir);
-}
-
 module.exports = {
   pages: {
     index: {
@@ -12,5 +6,8 @@ module.exports = {
     }
   },
   productionSourceMap: false,
-  outputDir: "./dist/web"
+  outputDir: "./dist/web",
+  devServer: {
+    proxy: "http://localhost:8088"
+  }
 };

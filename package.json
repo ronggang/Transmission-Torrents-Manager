@@ -1,9 +1,14 @@
 {
   "name": "ttmanager",
   "description": "Transmission Torrents Manager",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "author": {
+    "name": "ronggang",
+    "url": "https://github.com/ronggang"
+  },
+  "homepage": "https://github.com/ronggang/Transmission-Torrents-Manager",
   "dependencies": {
     "bencode": "^2.0.1",
     "body-parser": "^1.19.0",
@@ -29,11 +34,13 @@
     "@types/jquery": "^3.3.31",
     "@types/jszip": "^3.1.6",
     "@types/parse-torrent": "^5.8.3",
+    "@types/restify": "^8.4.1",
     "@vue/cli-plugin-typescript": "^4.0.5",
     "@vue/cli-service": "^4.0.5",
     "css-loader": "^3.2.0",
     "deepmerge": "^4.2.2",
     "fibers": "^4.0.2",
+    "null-loader": "^3.0.0",
     "pkg": "^4.4.0",
     "sass": "^1.23.3",
     "sass-loader": "^8.0.0",
@@ -48,9 +55,9 @@
     "ttmanager": "./dist/ttmanager.js"
   },
   "scripts": {
-    "web": "vue-cli-service build --mode=development",
-    "serve": "vue-cli-service build --mode=development && tsc -p ./src/server && node ./dist/index.js",
-    "server": "tsc -p ./src/server && node ./dist/index.js",
+    "debug:web": "vue-cli-service serve --mode=test",
+    "debug": "vue-cli-service build --mode=development && tsc -p ./src/server && node ./dist/index.js",
+    "debug:server": "tsc -p ./src/server && node ./dist/index.js",
     "dev": "tsc -p ./src/server && node ./dist/ttmanager.js",
     "pkg": "tsc -p ./src/server && pkg . --out-path bin --targets=latest-linux-armv7",
     "build": "vue-cli-service build . && tsc -p ./src/server",

@@ -1,6 +1,7 @@
 import * as restify from "restify";
 import App from "../app";
 import { Manager } from "../class/manager";
+import ERROR from "../interface/errorCodes";
 
 export class ManagerController {
   public service: Manager;
@@ -62,6 +63,56 @@ export class ManagerController {
         data: result
       });
     });
+    next();
+  }
+
+  /**
+   * 获取配置信息
+   * @param req
+   * @param res
+   * @param next
+   */
+  public getConfig(
+    req: restify.Request,
+    res: restify.Response,
+    next: restify.Next
+  ) {
+    this.service.getConfig().then(result => {
+      res.json({
+        data: result
+      });
+    });
+    next();
+  }
+
+  /**
+   * 导入种子信息
+   * @param req
+   * @param res
+   * @param next
+   */
+  public import(
+    req: restify.Request,
+    res: restify.Response,
+    next: restify.Next
+  ) {
+    if (req.files && req.files.data) {
+      this.service
+        .import(req.files.data.path)
+        .then(result => {
+          res.json({
+            data: result
+          });
+        })
+        .catch(err => {
+          res.json({
+            error: err
+          });
+        });
+    } else {
+      res.send(400, ERROR.InvalidRequest);
+    }
+
     next();
   }
 }

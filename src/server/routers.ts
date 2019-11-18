@@ -32,10 +32,27 @@ export class Routers {
       }
     );
 
+    // 导出
     this.server.post(
       "/api/export",
       (req: restify.Request, res: restify.Response, next: restify.Next) => {
         service.export(req, res, next);
+      }
+    );
+
+    // 导入
+    this.server.post(
+      "/api/import",
+      (req: restify.Request, res: restify.Response, next: restify.Next) => {
+        service.import(req, res, next);
+      }
+    );
+
+    // 获取配置
+    this.server.get(
+      "/api/config",
+      (req: restify.Request, res: restify.Response, next: restify.Next) => {
+        service.getConfig(req, res, next);
       }
     );
 

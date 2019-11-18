@@ -178,4 +178,95 @@ export class Manager {
       resolve(result);
     });
   }
+
+  public getConfig(): Promise<any> {
+    return new Promise<any>((resolve?: any, reject?: any) => {
+      const path = PATH.join(__dirname, "../../package.json");
+      if (FS.existsSync(path)) {
+        const config = JSON.parse(FS.readFileSync(path).toString());
+
+        resolve({
+          version: config.version,
+          description: config.description
+        });
+      } else {
+        reject("ERROR PACKAGE PATH");
+      }
+    });
+  }
+
+  /**
+   *
+   */
+  public import(dataPath: string): Promise<any> {
+    return new Promise<any>((resolve?: any, reject?: any) => {
+      const data = FS.readFileSync(dataPath);
+      JSZip.loadAsync(data)
+        .then(zip => {
+          let requests: any[] = [];
+          // 导入种子文件
+          zip.folder("torrents").forEach((relativePath, file) => {
+            let path = PATH.join(this.torrentsPath, relativePath);
+            requests.push(this.importFile(file, path));
+          });
+
+          // 导入resume文件
+          zip.folder("resume").forEach((relativePath, file) => {
+            let path = PATH.join(this.resumePath, relativePath);
+            requests.push(this.importFile(file, path));
+          });
+
+          return Promise.all(requests);
+        })
+        .then(results => {
+          let success = 0;
+          let skip = 0;
+          results.forEach(result => {
+            if (result.path.indexOf(".torrent") !== -1) {
+              if (result.status === 1) {
+                success++;
+              } else {
+                skip++;
+              }
+            }
+          });
+          // 返回导入数量
+          resolve({
+            success,
+            skip
+          });
+          FS.unlinkSync(dataPath);
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+          FS.unlinkSync(dataPath);
+        });
+    });
+  }
+
+  private importFile(file: JSZip.JSZipObject, path: string): Promise<any> {
+    return new Promise<any>((resolve?: any, reject?: any) => {
+      // 如果文件已存在，则跳过
+      if (FS.existsSync(path)) {
+        console.log("%s 已存在，跳过。", path);
+        resolve({
+          path,
+          status: 2
+        });
+        return;
+      }
+      // 写入文件
+      file
+        .nodeStream()
+        .pipe(FS.createWriteStream(path))
+        .on("finish", function() {
+          console.log("%s 已导入", path);
+          resolve({
+            path,
+            status: 1
+          });
+        });
+    });
+  }
 }
