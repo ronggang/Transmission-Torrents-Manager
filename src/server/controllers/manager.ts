@@ -36,8 +36,22 @@ export class ManagerController {
     res: restify.Response,
     next: restify.Next
   ) {
-    // console.log("req.params", req);
-    this.service.export(req.body.from, req.body.to).then(result => {
+    // console.log("req.body", req.body);
+    // res.json({
+    //   data: ""
+    // });
+    // next();
+    // return;
+
+    let from = req.body.from;
+    let to = req.body.to;
+
+    if (!from) {
+      from = req.body;
+      to = null;
+    }
+
+    this.service.export(from, to).then(result => {
       res.send(200, result, {
         "Content-Type": "application/octet-stream",
         "Content-Disposition":

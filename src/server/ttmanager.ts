@@ -7,6 +7,7 @@ import * as figlet from "figlet";
 import * as chalk from "chalk";
 
 import { Manager } from "./class/manager";
+import { EFilterType } from "./interface/common";
 
 class App {
   constructor() {
@@ -72,19 +73,65 @@ class App {
       });
     }
 
-    if (!options.source) {
-      promps.push({
-        type: "input",
-        name: "source",
-        message: "请输入需要导出的种子数据所在目录（默认为所有）："
-      });
-    }
+    promps.push({
+      type: "list",
+      message: "请选择导出类型：",
+      name: "exportMode",
+      choices: [
+        { name: "1. 导出所有种子", value: 1 },
+        { name: "2. 仅导出指定保存目录的种子", value: 2 },
+        { name: "3. 仅导出指定 Tracker 的种子", value: 3 }
+      ],
+      validate: function(input) {
+        if (!input) {
+          return "请选择类型";
+        }
+        return true;
+      }
+    });
+
+    promps.push({
+      type: "input",
+      name: "source",
+      message: "请输入需要导出的种子数据所在目录：",
+      when: answers => {
+        return answers.exportMode === 2;
+      }
+    });
+
+    promps.push({
+      type: "input",
+      name: "tracker",
+      message: "请输入需要导出的 Tracker 域名：",
+      when: answers => {
+        return answers.exportMode === 3;
+      }
+    });
 
     if (!options.to) {
       promps.push({
+        type: "list",
+        message: "请选择处理目标路径方式：",
+        name: "exportToMode",
+        choices: [
+          { name: "1. 和源目录保持一致", value: 1 },
+          { name: "2. 将目标路径修改为自定义值", value: 2 }
+        ],
+        validate: function(input) {
+          if (!input) {
+            return "请选择类型";
+          }
+          return true;
+        }
+      });
+
+      promps.push({
         type: "input",
         name: "to",
-        message: "请输入目标路径，如果不指定，则和源种子保存目录相同："
+        message: "请输入目标路径：",
+        when: answers => {
+          return answers.exportToMode === 2;
+        }
       });
     }
 
@@ -103,31 +150,49 @@ class App {
     }
 
     if (promps.length > 0) {
-      inquirer.prompt(promps).then(answers => {
-        this.confirm(Object.assign(options, answers));
+      inquirer.prompt(promps).then((answers: any) => {
+        // this.confirm(Object.assign(options, answers));
+
+        this.confirm({
+          rootPath: answers.var,
+          filterType: answers.exportMode,
+          filterValue: answers.source || answers.tracker,
+          targetPath: answers.to,
+          outputFile: answers.file
+        });
       });
     }
   }
 
   private confirm(options: any) {
     const messages: string[] = [];
+    // console.log(options);
     messages.push("请确认以下信息：");
     messages.push("----------------------------------");
-    messages.push(`Transmission 种子信息目录：${options.var}`);
+    messages.push(`Transmission 种子信息目录：${options.rootPath}`);
     messages.push("----------------------------------");
-    if (options.source) {
-      messages.push(`指定目录：${options.source} `);
-    } else {
-      messages.push(`指定目录：<所有种子> `);
+
+    switch (options.filterType) {
+      case EFilterType.Folder:
+        messages.push(`指定目录：${options.filterValue} `);
+        break;
+
+      case EFilterType.Tracker:
+        messages.push(`指定Tracker：${options.filterValue} `);
+        break;
+
+      default:
+        messages.push(`指定目录：<所有种子> `);
+        break;
     }
 
-    if (options.to) {
-      messages.push(`目标目录：${options.to}`);
+    if (options.targetPath) {
+      messages.push(`目标目录：${options.targetPath}`);
     } else {
       messages.push(`目标目录：保持不变`);
     }
 
-    messages.push(`输出文件：${options.file} `);
+    messages.push(`输出文件：${options.outputFile} `);
 
     messages.push("----------------------------------");
     messages.push("是否继续？");
@@ -143,8 +208,8 @@ class App {
       ])
       .then((answers: any) => {
         if (answers.confirm) {
-          const manager = new Manager(options.var);
-          manager.export(options.source, options.to, options.file);
+          const manager = new Manager(options.rootPath);
+          manager.export(options);
         }
       });
   }

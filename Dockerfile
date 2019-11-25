@@ -7,7 +7,7 @@ COPY ./package.json ./tsconfig.json ./yarn.lock ./vue.config.js $APP_PATH/
 # 设置工作路径
 WORKDIR $APP_PATH
 # 移除 Docker 中不需要的库并安装环境
-RUN yarn remove fibers commander inquirer chalk && yarn install
+RUN yarn remove fibers commander inquirer chalk pkg && yarn install
 # 复制源码
 COPY ./src $APP_PATH/src
 # 复制公用文件

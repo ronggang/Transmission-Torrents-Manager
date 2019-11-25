@@ -1,7 +1,7 @@
 {
   "name": "ttmanager",
   "description": "Transmission Torrents Manager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "index.js",
   "license": "MIT",
   "author": {
@@ -59,7 +59,7 @@
     "debug": "vue-cli-service build --mode=development && tsc -p ./src/server && node ./dist/index.js",
     "debug:server": "tsc -p ./src/server && node ./dist/index.js",
     "dev": "tsc -p ./src/server && node ./dist/ttmanager.js",
-    "pkg": "tsc -p ./src/server && pkg . --out-path bin --targets=latest-linux-armv7",
+    "pkg": "tsc -p ./src/server && pkg . --out-path bin",
     "build": "vue-cli-service build . && tsc -p ./src/server",
     "clean": "rm -rf ./node_modules",
     "docker:build": "docker image build -t ttmanager .",

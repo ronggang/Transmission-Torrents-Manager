@@ -2,7 +2,12 @@ import * as PATH from "path";
 import * as FS from "fs";
 import { Parser } from "./parser";
 import * as JSZip from "jszip";
-import { ITorrentItem } from "../interface/common";
+import { ITorrentItem, IExportOption, EFilterType } from "../interface/common";
+
+interface IFilterOption {
+  type: EFilterType;
+  value: string;
+}
 
 export class Manager {
   private resumePath: string = "";
@@ -19,17 +24,44 @@ export class Manager {
    * @param sourcePath
    * @param needResume
    */
-  public list(sourcePath: string = "", needResume: boolean = false) {
+  public list(
+    source: string | IFilterOption = "",
+    needResume: boolean = false
+  ) {
+    let options: IFilterOption = {
+      type: EFilterType.All,
+      value: ""
+    };
+
+    let sourcePath: string = "";
+
+    if (typeof source === "string") {
+      sourcePath = source;
+      options = Object.assign(options, {
+        type: EFilterType.Folder,
+        value: source
+      });
+    } else {
+      options = Object.assign(options, source);
+      if (options.type === EFilterType.Folder) {
+        sourcePath = options.value;
+      }
+    }
+
     const list = FS.readdirSync(this.torrentsPath);
 
     const result: any[] = [];
 
-    list.forEach((name: any) => {
+    console.log("已找到 %s 个文件.", list.length);
+
+    list.forEach((name: any, index: number) => {
       let basename = PATH.basename(name, ".torrent");
       let torrentFile = PATH.join(this.torrentsPath, name);
       let resumeFile = PATH.join(this.resumePath, `${basename}.resume`);
 
       if (FS.existsSync(torrentFile) && FS.existsSync(resumeFile)) {
+        console.log("正在解析 -> %s. %s", index + 1, name);
+
         let resume = this.parser.decode(resumeFile);
 
         // 如果指定了源目录，当目录不匹配时，跳过当前种子
@@ -37,9 +69,23 @@ export class Manager {
           return;
         }
 
-        console.log("正在解析 %s", name);
-
         let torrent: any = this.parser.parseTorrent(torrentFile);
+
+        if (options.type == EFilterType.Tracker) {
+          const announce: any[] = torrent.announce;
+
+          if (!announce) {
+            return;
+          }
+
+          if (
+            !announce.some((tracker: string) => {
+              return tracker.indexOf(options.value) !== -1;
+            })
+          ) {
+            return;
+          }
+        }
 
         let item: ITorrentItem = {
           name: resume.name,
@@ -60,23 +106,53 @@ export class Manager {
       }
     });
 
+    console.log(options);
+
     return result;
   }
 
   /**
    * 导出种子文件
-   * @param from 指定目录
+   * @param options 指定目录
    * @param to 目标目录
    * @param saveAs 需要另存的 zip 文件
    */
   public export(
-    from: string = "",
+    source: string | IExportOption = "",
     to: string = "",
     saveAs: string = ""
   ): Promise<any> {
     return new Promise<any>((resolve?: any, reject?: any) => {
-      console.log("开始分析种子文件, 源目录：%s, 目标目录：%s", from, to);
-      const list = this.list(from, true);
+      let options: IExportOption = {
+        rootPath: ""
+      };
+
+      let from = "";
+
+      if (typeof source === "string") {
+        from = source;
+        options = Object.assign(options, {
+          filterType: EFilterType.Folder,
+          filterValue: source,
+          targetPath: to,
+          outputFile: saveAs
+        });
+        console.log("开始分析种子文件, 源目录：%s, 目标目录：%s", from, to);
+      } else {
+        options = Object.assign(options, source);
+
+        console.log("开始分析种子文件, 目标目录：%s", options.targetPath);
+        to = options.targetPath;
+        saveAs = options.outputFile;
+      }
+
+      const list = this.list(
+        {
+          type: options.filterType,
+          value: options.filterValue
+        },
+        true
+      );
       const zip = new JSZip();
 
       console.log(
@@ -90,7 +166,7 @@ export class Manager {
         );
 
         let resume: any = null;
-        if (to && from != to) {
+        if (to) {
           item.resume.destination = to;
           resume = this.parser.encode(item.resume);
           // resume = resume.replace(
